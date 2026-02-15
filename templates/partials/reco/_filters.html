@@ -1,0 +1,130 @@
+<div class="card">
+  <h2 style="margin:0 0 10px;">{{ t("filters_optional") }}</h2>
+  <div class="muted" style="margin-bottom:12px;">
+    {{ t("filters_desc") }}
+  </div>
+
+  <form id="recoForm" method="post" action="/reco">
+    <div class="form-grid">
+
+      <div class="full">
+        <label>{{ t("libraries_multi") }}</label>
+        <select name="libraries" multiple size="5">
+          {% for l in libraries %}
+            {% set lid = (l.id|string) %}
+            <option value="{{ lid }}" {% if filters and (lid in (filters.libraries_ids or [])) %}selected{% endif %}>
+              {{ l.server_name }} · {{ l.title }}
+              ({{ t("movies") if l.type=="movie" else t("series") }})
+              {% if l.enabled!=1 %}[{{ t("off") }}]{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>{{ t("type") }}</label>
+        <select name="type">
+          <option value="both" {% if filters and filters.type=="both" %}selected{% endif %}>{{ t("movies_series") }}</option>
+          <option value="movie" {% if filters and filters.type=="movie" %}selected{% endif %}>{{ t("movies") }}</option>
+          <option value="show" {% if filters and filters.type=="show" %}selected{% endif %}>{{ t("series") }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label>{{ t("number") }}</label>
+        <input type="number" min="5" max="40" name="limit" value="{{ (filters.limit if filters else default_limit) }}">
+      </div>
+
+      <div>
+        <label>{{ t("less_than_x_years") }}</label>
+        <input type="number" min="0" max="80" name="max_age_years" placeholder="{{ t('example') }}: 10"
+               value="{{ (filters.max_age_years if filters else '') }}">
+      </div>
+
+      <div>
+        <label>{{ t("rating_min") }}</label>
+        <input type="number" step="0.1" min="0" max="10" name="min_rating" placeholder="{{ t('example') }}: 6.8"
+               value="{{ (filters.min_rating if filters else '') }}">
+      </div>
+
+      <div>
+        <label>{{ t("min_stars") }}</label>
+        <select name="min_stars">
+          <option value="" {% if filters and (filters.min_stars is none) %}selected{% endif %}>—</option>
+          {% for v in [0,1,1.5,2,2.5,3,3.5,4,4.5,5] %}
+            <option value="{{ v }}" {% if filters and (filters.min_stars == v) %}selected{% endif %}>
+              {{ v }} ★
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>{{ t("duration_min") }}</label>
+        <input type="number" min="0" max="400" name="duration_min" placeholder="{{ t('example') }}: 80"
+               value="{{ (filters.duration_min if filters else '') }}">
+      </div>
+
+      <div>
+        <label>{{ t("duration_max") }}</label>
+        <input type="number" min="0" max="400" name="duration_max" placeholder="{{ t('example') }}: 160"
+               value="{{ (filters.duration_max if filters else '') }}">
+      </div>
+
+      <div class="full">
+        <label>{{ t("include_watched") }}</label>
+        <div style="display:flex; align-items:center; gap:8px; padding:10px 8px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(2,6,23,.55);">
+          <input type="checkbox" name="include_watched" {% if filters and filters.include_watched %}checked{% endif %}>
+          <span class="small">{{ t("yes") }}</span>
+        </div>
+      </div>
+
+      <div>
+        <details>
+          <summary>{{ t("include_genres") }}</summary>
+          <div class="genres" style="margin-top:10px;">
+            {% for g in genres %}
+              <div class="g">
+                <input type="checkbox" name="include_genres" value="{{ g }}"
+                  {% if filters and (g in filters.include_genres) %}checked{% endif %}>
+                <span class="small">{{ g }}</span>
+              </div>
+            {% endfor %}
+            {% if not genres %}
+              <div class="small">{{ t("no_genres_in_db") }}</div>
+            {% endif %}
+          </div>
+        </details>
+      </div>
+
+      <div>
+        <details>
+          <summary>{{ t("exclude_genres") }}</summary>
+          <div class="genres" style="margin-top:10px;">
+            {% for g in genres %}
+              <div class="g">
+                <input type="checkbox" name="exclude_genres" value="{{ g }}"
+                  {% if filters and (g in filters.exclude_genres) %}checked{% endif %}>
+                <span class="small">{{ g }}</span>
+              </div>
+            {% endfor %}
+            {% if not genres %}
+              <div class="small">{{ t("no_genres_in_db") }}</div>
+            {% endif %}
+          </div>
+        </details>
+      </div>
+
+      <div class="full">
+        <button class="btn" type="submit">✨ {{ t("new_suggestions") }}</button>
+      </div>
+
+    </div>
+  </form>
+
+  <div class="muted" style="margin-top:12px;">
+    {{ t("no_results_help_1") }}
+    <a class="pill" href="{{ url_for('servers_page') }}">{{ t("servers") }}</a>,
+    {{ t("no_results_help_2") }}
+  </div>
+</div>

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items:start;">
+
+  <div class="card">
+    <div style="font-weight:800; font-size:16px;">{{ t("tmdb_title") }}</div>
+    <div class="muted" style="margin-top:4px;">{{ t("tmdb_help") }}</div>
+
+    <form action="/settings/tmdb" method="post" class="form-grid" style="margin-top:12px;">
+      <div class="full">
+        <label>{{ t("tmdb_api_key") }}</label>
+        <input name="api_key" type="password" value="{{ tmdb_api_key }}" placeholder="xxxx..." />
+      </div>
+
+      <div>
+        <label>{{ t("tmdb_language") }}</label>
+        <input name="language" value="{{ tmdb_language }}" placeholder="fr-FR" />
+      </div>
+
+      <div>
+        <label>{{ t("tmdb_region") }}</label>
+        <input name="region" value="{{ tmdb_region }}" placeholder="FR" />
+      </div>
+
+      <div class="full">
+        <button class="btn2" type="submit">{{ t("save") }}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:800; font-size:16px;">{{ t("scan_title") }}</div>
+    <div class="muted" style="margin-top:4px;">{{ t("scan_help") }}</div>
+
+    <form action="/settings/scan" method="post" style="margin-top:12px;">
+      <label>{{ t("scan_interval_hours") }}</label>
+      <div class="inline" style="gap:10px; align-items:center;">
+        <input name="auto_scan_hours" type="number" min="0" step="1" value="{{ auto_scan_hours }}" style="max-width:160px;" />
+        <button class="btn2" type="submit">💾</button>
+      </div>
+
+      <div class="muted" style="margin-top:8px; font-size:12px;">{{ t("scan_interval_hint") }}</div>
+    </form>
+
+    <hr style="border:none; border-top:1px solid rgba(255,255,255,.08); margin:14px 0;"/>
+
+    <form action="/scan-now" method="post" style="margin:0;">
+      <button class="btn2" type="submit" {% if scan_running %}disabled{% endif %}>{{ t("scan_now") }}</button>
+      <div class="muted" style="margin-top:8px; font-size:12px;">
+        {% if scan_running %}{{ t("scan_in_progress") }}{% else %}{{ t("last_scan", ts=(last_scan or "-")) }}{% endif %}
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:800; font-size:16px;">{{ t("language_title") }}</div>
+    <div class="muted" style="margin-top:4px;">{{ t("language_help") }}</div>
+
+    <form action="/settings/lang" method="post" style="margin-top:12px;">
+      <label>{{ t("language_select") }}</label>
+      <select name="app_language">
+        <option value="auto" {% if lang_pref=='auto' or not lang_pref %}selected{% endif %}>{{ t("language_auto") }}</option>
+        {% for code in available_langs %}
+          <option value="{{ code }}" {% if lang_pref==code %}selected{% endif %}>{{ code|upper }}</option>
+        {% endfor %}
+      </select>
+
+      <div class="full" style="margin-top:12px;">
+        <button class="btn2" type="submit">{{ t("save") }}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:800; font-size:16px;">{{ t("reco_title") }}</div>
+
+    <form action="/settings/reco" method="post" style="margin-top:12px;">
+      <label>{{ t("reco_cooldown") }}</label>
+      <div class="inline" style="gap:10px; align-items:center;">
+        <input name="reco_cooldown_sec" type="number" min="0" step="1" value="{{ reco_cooldown_sec }}" style="max-width:160px;" />
+        <button class="btn2" type="submit">💾</button>
+      </div>
+
+      <div class="muted" style="margin-top:8px; font-size:12px;">{{ t("reco_cooldown_hint") }}</div>
+	  <div class="muted" style="margin-top:6px; font-size:12px;">{{ t("reco_cooldown_desc") }}</div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

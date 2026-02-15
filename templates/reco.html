@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="grid">
+    {# Filtres à gauche #}
+    {% include "partials/reco/_filters.html" %}
+
+    {# Suggestions à droite #}
+    {% include "partials/reco/_suggestions.html" %}
+  </div>
+
+<script>
+(function () {
+  const form = document.getElementById("recoForm");
+  if (!form) return;
+
+  // v2 => ignore les anciens réglages persistés (v1) qui pouvaient te limiter à 1-2 résultats
+  const KEY = "wwiw.reco.filters.v2";
+
+  function setSelectMulti(el, values) {
+    const set = new Set(values || []);
+    for (const opt of el.options) opt.selected = set.has(opt.value);
+  }
+
+  function getSelectMulti(el) {
+    return Array.from(el.selectedOptions).map((o) => o.value);
+  }
+
+  function setCheckboxGroup(name, values) {
+    const set = new Set(values || []);
+    document.querySelectorAll('input[name="' + name + '"]').forEach((cb) => {
+      cb.checked = set.has(cb.value);
+    });
+  }
+
+  function getCheckboxGroup(name) {
+    return Array.from(
+      document.querySelectorAll('input[name="' + name + '"]:checked')
+    ).map((cb) => cb.value);
+  }
+
+  // RESTORE
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+
+      const libs = form.querySelector('select[name="libraries"]');
+      if (libs) setSelectMulti(libs, s.libraries);
+
+      const type = form.querySelector('select[name="type"]');
+      if (type && s.type) type.value = s.type;
+
+      [
+        "limit",
+        "max_age_years",
+        "min_rating",
+        "min_stars",
+        "duration_min",
+        "duration_max",
+      ].forEach((k) => {
+        const el = form.querySelector('[name="' + k + '"]');
+        if (el && s[k] !== undefined && s[k] !== null && s[k] !== "") el.value = s[k];
+      });
+
+      const incWatched = form.querySelector('input[name="include_watched"]');
+      if (incWatched) incWatched.checked = !!s.include_watched;
+
+      setCheckboxGroup("include_genres", s.include_genres);
+      setCheckboxGroup("exclude_genres", s.exclude_genres);
+    }
+  } catch (e) {}
+
+  // SAVE
+  form.addEventListener("submit", () => {
+    const payload = {};
+
+    const libs = form.querySelector('select[name="libraries"]');
+    if (libs) payload.libraries = getSelectMulti(libs);
+
+    const type = form.querySelector('select[name="type"]');
+    payload.type = type ? type.value : "both";
+
+    [
+      "limit",
+      "max_age_years",
+      "min_rating",
+      "min_stars",
+      "duration_min",
+      "duration_max",
+    ].forEach((k) => {
+      const el = form.querySelector('[name="' + k + '"]');
+      payload[k] = el ? el.value : "";
+    });
+
+    const incWatched = form.querySelector('input[name="include_watched"]');
+    payload.include_watched = incWatched ? incWatched.checked : false;
+
+    payload.include_genres = getCheckboxGroup("include_genres");
+    payload.exclude_genres = getCheckboxGroup("exclude_genres");
+
+    try {
+      localStorage.setItem(KEY, JSON.stringify(payload));
+    } catch (e) {}
+  });
+
+  // AUTO-GENERATE robuste: fonctionne au chargement ET quand on revient sur la page
+  const HAS_RECO = {{ 'true' if (reco or filters or error) else 'false' }};
+  const HAS_SCAN = {{ 'true' if last_scan else 'false' }};
+
+  const AUTO_KEY = "wwiw.reco.autogen.lastTs";
+
+  function autoGenerateIfNeeded() {
+    if (HAS_RECO || !HAS_SCAN) return;
+
+    let saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    if (!saved) return;
+
+    const now = Date.now();
+    let last = 0;
+    try { last = parseInt(sessionStorage.getItem(AUTO_KEY) || "0", 10); } catch (e) {}
+
+    // anti-boucle: max 1 auto-submit toutes les 3 secondes
+    if (now - last < 3000) return;
+
+    try { sessionStorage.setItem(AUTO_KEY, String(now)); } catch (e) {}
+
+    setTimeout(() => {
+      if (form.requestSubmit) form.requestSubmit();
+      else form.submit();
+    }, 50);
+  }
+
+  // 1) au vrai chargement
+  autoGenerateIfNeeded();
+
+  // 2) quand la page revient (BFCache ou navigation)
+  window.addEventListener("pageshow", () => {
+    autoGenerateIfNeeded();
+  });
+
+  // 3) quand l’onglet redevient visible (très efficace contre BFCache “silencieux”)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") autoGenerateIfNeeded();
+  });
+
+  // 4) reset léger quand on quitte la page (permet de regénérer en revenant)
+  window.addEventListener("pagehide", () => {
+    try { sessionStorage.removeItem(AUTO_KEY); } catch (e) {}
+  });
+
+
+})();
+</script>
+
+{% endblock %}

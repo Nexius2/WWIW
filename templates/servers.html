@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="grid" style="grid-template-columns: 520px 1fr; gap: 16px; align-items:start;">
+
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    <div class="card">
+      <div style="font-weight:800; font-size:16px;">{{ t("servers_title") }}</div>
+      <div class="muted" style="margin-top:4px;">{{ t("servers_help") }}</div>
+
+      {% if error %}
+        <div class="alert" style="margin-top:12px;">⚠️ {{ error }}</div>
+      {% endif %}
+
+      <hr style="border:none; border-top:1px solid rgba(255,255,255,.08); margin:14px 0;"/>
+
+      <form action="/servers/add" method="post" class="form-grid">
+        <div class="full">
+          <label>{{ t("name") }}</label>
+          <input name="name" placeholder="Plex Maison" required />
+        </div>
+
+        <div class="full">
+          <label>{{ t("base_url") }}</label>
+          <input name="base_url" placeholder="http://192.168.1.10:32400" required />
+        </div>
+
+        <div class="full">
+          <label>{{ t("token") }}</label>
+          <div class="inline" style="gap:8px;">
+            <input id="add_token" name="token" type="password" placeholder="Plex Token" required />
+            <button type="button" class="eye" onclick="togglePassword('add_token')">👁️</button>
+          </div>
+        </div>
+
+        <div class="full">
+          <button class="btn2" type="submit">{{ t("add") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="height:100%;">
+    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+      <div style="font-weight:800; font-size:16px;">{{ t("list") }}</div>
+      <span class="pill">{{ t("servers_count", count=servers|length) }}</span>
+    </div>
+
+    <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+      {% if not servers %}
+        <div class="muted">{{ t("no_servers") }}</div>
+      {% else %}
+        {% for s in servers %}
+        <div class="item">
+          <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+            <div style="min-width:0;">
+              <div style="display:flex; gap:10px; align-items:center;">
+                <div style="font-weight:800;">{{ s.name }}</div>
+                {% if s.enabled %}<span class="pill">✅</span>{% else %}<span class="pill">⛔</span>{% endif %}
+              </div>
+              <div class="small" style="margin-top:6px; word-break:break-all;">{{ s.base_url }}</div>
+            </div>
+
+            <div class="inline" style="gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+              <form action="/servers/toggle" method="post" style="margin:0;">
+                <input type="hidden" name="server_id" value="{{ s.id }}"/>
+                {% if s.enabled %}
+                  <button class="btn" type="submit">{{ t("disable") }}</button>
+                {% else %}
+                  <button class="btn2" type="submit">{{ t("enabled") }}</button>
+                {% endif %}
+              </form>
+
+              <button class="btn" onclick="openEdit({{ s.id }}, {{ s.name|tojson }}, {{ s.base_url|tojson }})">{{ t("edit") }}</button>
+
+              <form action="/servers/delete" method="post" style="margin:0;" onsubmit="return confirm({{ t('confirm_delete_server')|tojson }});">
+                <input type="hidden" name="server_id" value="{{ s.id }}"/>
+                <button class="btn btn-danger" type="submit">{{ t("delete") }}</button>
+              </form>
+            </div>
+          </div>
+
+          <div id="edit-{{ s.id }}" style="display:none; margin-top:12px;">
+            <form action="/servers/update" method="post" class="form-grid">
+              <input type="hidden" name="server_id" value="{{ s.id }}"/>
+
+              <div class="full">
+                <label>{{ t("name") }}</label>
+                <input name="name" id="edit-name-{{ s.id }}" required />
+              </div>
+
+              <div class="full">
+                <label>{{ t("base_url") }}</label>
+                <input name="base_url" id="edit-url-{{ s.id }}" required />
+              </div>
+
+              <div class="full">
+                <label>{{ t("new_token_optional") }}</label>
+                <div class="inline" style="gap:8px;">
+                  <input id="edit-token-{{ s.id }}" name="token" type="password" placeholder="Plex Token" />
+                  <button type="button" class="eye" onclick="togglePassword('edit-token-{{ s.id }}')">👁️</button>
+                </div>
+                <div class="muted" style="margin-top:6px; font-size:12px;">{{ t("token_unchanged_hint") }}</div>
+              </div>
+
+              <div class="full inline" style="gap:10px;">
+                <button class="btn2" type="submit">{{ t("update") }}</button>
+                <button class="btn" type="button" onclick="closeEdit({{ s.id }})">{{ t("cancel") }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+function openEdit(id, name, url){
+  const box = document.getElementById('edit-'+id);
+  box.style.display = 'block';
+  document.getElementById('edit-name-'+id).value = name || '';
+  document.getElementById('edit-url-'+id).value = url || '';
+}
+function closeEdit(id){
+  const box = document.getElementById('edit-'+id);
+  box.style.display = 'none';
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+            {% if it.plex_url %}
+            <a class="item item-link" href="{{ it.plex_url }}" target="_blank" rel="noopener">
+            {% else %}
+            <div class="item">
+            {% endif %}
+              <div class="item-row">
+                {% if it.thumb %}
+                  <img class="poster" src="poster?server_id={{ it.server_id }}&thumb={{ it.thumb | urlencode }}" alt="poster">
+                {% else %}
+                  <div class="poster"></div>
+                {% endif %}
+
+                <div style="flex:1;">
+                  <h3 style="margin:0;">{{ it.title }}{% if it.year %} ({{ it.year }}){% endif %}</h3>
+
+                  <div class="meta">
+                    <span class="pill">{{ t("movies") if it.type == "movie" else t("series") }}</span>
+                    {% if it.duration_min %}<span class="pill">{{ it.duration_min }} {{ "min" }}</span>{% endif %}
+                    {% if it.rating %}<span class="pill">⭐ Plex {{ "%.1f"|format(it.rating) }}</span>{% endif %}
+					{% if it.stars_plex_str %}<span class="pill">⭐ {{ it.stars_plex_str }}</span>{% endif %}
+					{% if it.stars_imdb %}<span class="pill">IMDb {{ it.stars_imdb }}</span>{% endif %}
+					{% if it.stars_tmdb %}<span class="pill">TMDb {{ it.stars_tmdb }}</span>{% endif %}
+					{% if it.stars_tvdb %}<span class="pill">TVDb {{ it.stars_tvdb }}</span>{% endif %}
+                    <!-- {% if it.watched %}<span class="pill">✅ {{ "Vu" }}</span>{% else %}<span class="pill">🆕 Non vu</span>{% endif %} -->
+                    <span class="pill">Score {{ it.score }}</span>
+                  </div>
+
+                  <div class="meta" style="margin-top:8px;">
+                    {% for g in it.genres[:6] %}
+                      <span class="pill">{{ g }}</span>
+                    {% endfor %}
+                  </div>
+
+                  {% if it.summary %}
+                    <p class="muted" style="margin-top:8px; line-height:1.35;">{{ it.summary }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% if it.plex_url %}</a>{% else %}</div>{% endif %}
+

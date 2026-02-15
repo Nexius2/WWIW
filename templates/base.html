@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="{{ lang_code }}">
+<head>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon_32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon_16.png">
+
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ app_name }}</title>
+  <style>
+      *, *::before, *::after { box-sizing: border-box; }
+
+    :root{
+      --bg: #070b14;
+      --card: rgba(255,255,255,.03);
+      --border: rgba(245,158,11,.20);
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --amber: rgba(245,158,11,.22);
+      --yellow: rgba(234,179,8,.22);
+      --danger: rgba(239,68,68,.14);
+    }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background: radial-gradient(1200px 600px at 10% 0%, rgba(245,158,11,.10), transparent 55%), var(--bg); color: var(--text); }
+    a { color: inherit; text-decoration: none; }
+    .top { padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+	.brand{
+	  font-weight:800;
+	  font-size:18px;
+	  letter-spacing:.4px;
+	}
+
+.brand-accent{
+  color: rgba(245,158,11,.85);
+  font-weight: 800;
+}
+
+
+
+
+
+
+
+    .sub { color: var(--muted); font-size: 12px; margin-top: 2px;}
+    .row { display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
+    .badge { font-size: 12px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 999px; color: #cbd5e1; background: rgba(2,6,23,.35); }
+    /* Un peu plus large pour afficher 2 suggestions côte à côte sans scroller */
+    .wrap { max-width: 1900px; width: min(1900px, 100%); margin: 0 auto; padding: 18px 22px; }
+    .tabs { display:flex; gap:10px; }
+    .tab { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.10); background: rgba(2,6,23,.35); font-size: 13px; color:#cbd5e1; }
+    .tab.active { border-color: var(--border); background: rgba(245,158,11,.12); color: #fff; }
+    
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,.08); border-color: rgba(245,158,11,.12); border-radius: 18px; padding: 14px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    label { font-size: 13px; color: #cbd5e1; display:block; margin-bottom: 6px; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(2,6,23,.55);
+      color: var(--text);
+    }
+    input[type=checkbox] { width:auto; }
+    textarea { min-height: 90px; resize: vertical; }
+    .btn { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background: var(--amber); color: #fff; cursor: pointer; }
+    .btn2 { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background: var(--yellow); color:#fff; cursor:pointer; }
+    .btn-danger { background: var(--danger); }
+    .btn:disabled, .btn2:disabled { opacity:.6; cursor:not-allowed; }
+    .err { color: #fecaca; background: var(--danger); border: 1px solid rgba(239,68,68,.25); padding: 10px 12px; border-radius: 12px; }
+    .pill { font-size: 12px; padding: 4px 8px; border-radius: 999px; border:1px solid rgba(245,158,11,.18); color:#cbd5e1; background: rgba(2,6,23,.35); }
+    .item { padding: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02); }
+    a.item-link { display:block; color: inherit; text-decoration: none; cursor: pointer; }
+    a.item-link:hover { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.04); }
+    
+    .meta { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .small { font-size: 12px; color: var(--muted); }
+    .genres { max-height: 160px; overflow:auto; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 10px; background: rgba(2,6,23,.35); }
+    .genres .g { display:flex; align-items:center; gap:8px; margin: 6px 0; }
+    .inline { display:flex; gap: 10px; align-items:center; }
+    .eye { cursor: pointer; user-select:none; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: rgba(2,6,23,.35); }
+	
+	.form-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+	.form-grid .full { grid-column: 1 / -1; }
+	.form-grid > * { min-width: 0; }
+	select[multiple] { width: 100%; }
+
+
+	/* Layout Reco : filtres à gauche un peu plus large */
+	.grid { display:grid; grid-template-columns: clamp(320px, 26vw, 420px) 1fr; gap: 16px; align-items: start; }
+	@media (max-width: 1100px){
+	  .grid{ grid-template-columns: 1fr; }
+	}
+
+	/* Suggestions : 3 cartes côte à côte sur desktop */
+	.results-grid{
+	  display: grid;
+	  grid-template-columns: repeat(3, minmax(0, 1fr));
+	  gap: 14px;
+	}
+
+	/* Responsive : 2 colonnes puis 1 */
+	@media (max-width: 1200px){
+	  .results-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	@media (max-width: 800px){
+	  .results-grid{ grid-template-columns: 1fr; }
+	}
+
+
+	.poster {
+	  width: 120px;
+	  height: 180px;
+	  border-radius: 14px;
+	  object-fit: cover;
+	  border: 1px solid rgba(255,255,255,.12);
+	  background: rgba(255,255,255,.03);
+	  flex: 0 0 auto;
+	}
+
+	.item h3 { margin: 0; font-size: 17px; }
+
+	.item { padding: 12px; border-radius: 18px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02); }
+	.item:hover { border-color: rgba(245,158,11,.28); background: rgba(255,255,255,.03); }
+
+	
+	/* (la règle responsive results-grid est maintenant juste au-dessus) */
+
+	
+	.item-row { display:flex; gap: 12px; align-items:flex-start; }
+
+	details { border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: rgba(2,6,23,.35); padding: 8px 10px; }
+	summary { cursor: pointer; color: #cbd5e1; font-size: 13px; }
+
+.scanprog{
+  width: 420px;
+  max-width: 38vw;
+  margin: 0 14px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.scanprog-bar{
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.scanprog-fill{
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(234,179,8,.85);
+  transition: width .25s ease;
+}
+.scanprog-meta{
+  display:flex;
+  gap: 10px;
+  margin-top: 8px;
+  align-items: center;
+}
+.scanprog-pct{
+  min-width: 44px;
+  font-weight: 800;
+  font-size: 14px;
+  color: rgba(255,255,255,.92);
+}
+.scanprog-step{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,.88);
+  line-height: 1.2;
+}
+.scanprog-line{
+  display:flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* important pour l'ellipsis */
+}
+.scanprog-detail-inline{
+  color: rgba(255,255,255,.55);
+  font-weight: 700;          /* identique scanprog-step */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;          /* ajuste si tu veux */
+}
+  </style>
+</head>
+<body>
+
+  <div class="top">
+    <div>
+		<div class="brand">
+		  <span class="brand-accent">W</span>hat
+		  <span class="brand-accent">W</span>ill
+		  <span class="brand-accent">I</span>
+		  <span class="brand-accent">W</span>atch
+		</div>
+
+
+      <div class="sub">{{ t("version_label") }} {{ version }}</div>
+      <div class="tabs" style="margin-top:10px;">
+        <a class="tab {% if mode=='reco' %}active{% endif %}" href="/reco">{{ t("tab_reco") }}</a>
+        <a class="tab {% if mode=='settings' %}active{% endif %}" href="/settings">{{ t("tab_settings") }}</a>
+        <a class="tab {% if mode=='servers' %}active{% endif %}" href="/servers">{{ t("tab_servers") }}</a>
+      </div>
+    </div>
+
+    <div id="scanProgWrap" class="scanprog" style="display:none;">
+      <div class="scanprog-bar">
+        <div id="scanProgFill" class="scanprog-fill" style="width:0%"></div>
+      </div>
+      <div class="scanprog-meta">
+        <div class="scanprog-pct"><span id="scanProgPct">0</span>%</div>
+		<div class="scanprog-text scanprog-line">
+		  <div id="scanProgStep" class="scanprog-step">—</div>
+		  <div id="scanProgDetail" class="scanprog-step scanprog-detail-inline"></div>
+		</div>
+
+      </div>
+    </div>
+
+
+	<div class="row">
+	  <div class="row" style="gap:8px;">
+		{% if scan_running %}
+		  <span class="badge" style="border-color: rgba(234,179,8,.4); background: rgba(234,179,8,.15);">
+			{{ t("scan_in_progress") }}
+		  </span>
+		{% elif error %}
+		  <span class="badge" style="border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.15);">
+			{{ t("scan_error") }}
+		  </span>
+		{% else %}
+		  <span class="badge" style="border-color: rgba(34,197,94,.4); background: rgba(34,197,94,.12);">
+			🟢 {{ t("ready") }}
+		  </span>
+
+		  <span class="badge">
+			🕒 {{ t("last_scan") }} :
+			{% if last_scan %}
+			  {{ last_scan }}
+			{% else %}
+			  {{ t("never") }}
+			{% endif %}
+		  </span>
+		{% endif %}
+	  </div>
+	</div>
+
+  </div>
+
+  <div class="wrap">
+    {% if error %}
+      <div class="err" style="margin-bottom:14px;">{{ error }}</div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+<script>
+  // toggle password inputs (eye)
+  function togglePassword(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.type = (el.type === "password") ? "text" : "password";
+  }
+  window.togglePassword = togglePassword;
+</script>
+<script>
+(function(){
+  const wrap = document.getElementById("scanProgWrap");
+  const fill = document.getElementById("scanProgFill");
+  const pctEl = document.getElementById("scanProgPct");
+  const stepEl = document.getElementById("scanProgStep");
+  const detailEl = document.getElementById("scanProgDetail");
+
+  async function tick(){
+    try{
+      const r = await fetch("/scan-status", { cache: "no-store" });
+      if(!r.ok) return;
+      const s = await r.json();
+
+      if(s.scan_running){
+        wrap.style.display = "";
+        const pct = Math.max(0, Math.min(100, parseInt(s.pct || 0)));
+        fill.style.width = pct + "%";
+        pctEl.textContent = String(pct);
+        stepEl.textContent = s.step || "Scan en cours…";
+        detailEl.textContent = s.detail ? "• " + s.detail : "";
+      } else {
+        wrap.style.display = "none";
+      }
+    }catch(e){
+      // silence
+    }
+  }
+
+  tick();
+  setInterval(tick, 1200);
+})();
+</script>
+
+</body>
+</html>

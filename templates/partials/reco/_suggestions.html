@@ -1,0 +1,36 @@
+<div class="card">
+  <h2 style="margin:0 0 10px;">{{ t("suggestions_title") }}</h2>
+
+  {% if reco %}
+    <div class="muted" style="margin-bottom:10px;">
+      {{ t("profile_genres_seen") }}
+      {% for g in reco.top_genres_profile %}
+        <span class="pill">{{ g }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="muted" style="margin-bottom:12px;">
+      {{ t("results_label", count=reco.count, last_scan=(last_scan or t("never"))) }}
+    </div>
+
+    {% if filters and filters.exclude_genres %}
+      <div class="muted" style="margin-bottom:12px;">
+        {{ t("active_exclusions") }}
+        {% for g in filters.exclude_genres %}
+          <span class="pill">🚫 {{ g }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="results-grid">
+      {% for it in reco.results %}
+        {% include "partials/reco/_suggestion_card.html" %}
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="muted">
+      {{ t("no_reco_yet") }}
+    </div>
+  {% endif %}
+</div>
